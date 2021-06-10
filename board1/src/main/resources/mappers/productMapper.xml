@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.board.mappers.product">
+	
+	<select id="Product_List" resultType="com.board.domain.ProductVO">
+	select bno, pname, category, quantity, product_price from product.product
+	</select>
+	
+	<!-- 게시물 작성 -->
+<insert id="Product_add" parameterType="com.board.domain.ProductVO">
+ insert into product.product(pname, category, quantity, product_price) values(#{pname},#{category},#{quantity},#{product_price});
+</insert>
+
+<!-- 게시물 조회 X--> 
+<select id="pview" parameterType="int" resultType="com.board.domain.ProductVO">
+ select bno, pname, category, quantity, product_price from product.product where bno = #{bno}   
+</select>
+
+<!-- 게시물 수정 -->
+<update id="pmodify" parameterType="com.board.domain.ProductVO" >
+ update product.product
+  set
+   pname = #{pname},
+   category = #{category},
+   product_price = #{product_price},
+   quantity = #{quantity}
+  where bno = #{bno}
+</update>
+<!-- 게시물 삭제 -->
+<delete id="Product_delete" parameterType="int">
+ delete from product.product where bno = #{bno}
+</delete>
+
+<!-- 게시물 총 갯수 -->
+<select id="count" parameterType="hashMap" resultType="int">
+ select count(bno) from product.product
+ 
+ <if test='searchType.equals("bno")'>
+  WHERE bno LIKE concat('%', #{keyword}, '%')
+ </if>
+ 
+ <if test='searchType.equals("pname")'>
+  WHERE pname LIKE concat('%', #{keyword}, '%')
+ </if>
+ 
+ <if test='searchType.equals("category")'>
+  WHERE category LIKE concat('%', #{keyword}, '%') 
+ </if>
+</select>
+
+<!-- 게시물 목록 + 페이징 -->
+<select id="Product_ListPage" parameterType="hashMap" resultType="com.board.domain.ProductVO">
+ select
+  bno, pname, category, quantity, product_price
+ from product.product
+ <if test='searchType.equals("bno")'>
+  WHERE bno LIKE concat('%', #{keyword}, '%')
+ </if>
+ 
+ <if test='searchType.equals("pname")'>
+  WHERE pname LIKE concat('%', #{keyword}, '%')
+ </if>
+ 
+ <if test='searchType.equals("category")'>
+  WHERE category LIKE concat('%', #{keyword}, '%') 
+ </if>
+ 
+ order by bno desc
+  limit #{displayPost}, #{postNum}
+</select>
+
+<!-- 팝업 입출고 -->
+<update id="ppop" parameterType="com.board.domain.ProductVO" >
+ update product.product set 
+ 
+ <if test='remark==1'>
+  quantity = quantity + #{changes} 
+ </if>
+  <if test='remark==2'>
+  quantity = quantity - #{changes} 
+ </if>
+  <if test='remark==3'>
+  quantity = #{changes} 
+ </if>
+
+  where bno = #{bno}
+</update>
+
+</mapper>
